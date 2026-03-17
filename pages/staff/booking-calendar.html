@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YorkU Staff – Booking Calendar</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-placeholder"></div>
+  <div class="main-with-sidebar">
+    <div style="background:#fff;padding:12px 24px;border-bottom:1px solid var(--border);font-size:0.82rem;color:var(--gray-500);">Staff Portal</div>
+    <div class="page-content">
+      <div class="page-header">
+        <h1>Booking Calendar</h1>
+        <p>View and manage daily bookings</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;">
+        <!-- Calendar Card -->
+        <div class="card">
+          <h2 class="section-title">Select Date</h2>
+          <div class="calendar-wrap">
+            <div class="calendar-header">
+              <button class="cal-nav" id="prev-month">&#8249;</button>
+              <h3 id="cal-month-label">March 2026</h3>
+              <button class="cal-nav" id="next-month">&#8250;</button>
+            </div>
+            <div class="calendar-grid">
+              <div class="cal-day-name">Su</div>
+              <div class="cal-day-name">Mo</div>
+              <div class="cal-day-name">Tu</div>
+              <div class="cal-day-name">We</div>
+              <div class="cal-day-name">Th</div>
+              <div class="cal-day-name">Fr</div>
+              <div class="cal-day-name">Sa</div>
+              <div id="cal-days"></div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:16px;">
+            <label class="form-label">Filter by Floor</label>
+            <select class="form-select" id="filter-floor">
+              <option>All Floors</option>
+              <option>Floor 1</option>
+              <option>Floor 2</option>
+              <option>Floor 3</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Bookings for selected date -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h2 class="section-title" id="bookings-date-label" style="margin:0;">Bookings for March 14, 2026</h2>
+            <span class="badge badge-gray" id="bookings-count">0 bookings</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Room</th>
+                  <th>Student</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="cal-bookings-tbody">
+                <tr class="empty-row"><td colspan="5">No bookings for this date</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script src="../../js/shared.js"></script>
+<script>
+  requireAuth('Staff');
+  document.getElementById('sidebar-placeholder').innerHTML = buildSidebar('Staff', 'Booking Calendar');
+
+  let currentYear = 2026, currentMonth = 2; // 0-indexed, March = 2
+  let selectedDate = null;
+
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  // Bookings keyed by date string "YYYY-MM-DD"
+  const BOOKING_DATA = {
+    '2026-03-13': [
+      { time: '10:00 - 11:00', room: 'Room 104 – Floor 1', student: 'John Smith', status: 'Upcoming' },
+      { time: '11:00 - 12:00', room: 'Room 103 – Floor 1', student: 'Sarah Johnson', status: 'Upcoming' },
+      { time: '13:00 - 14:00', room: 'Room 205 – Floor 2', student: 'John Smith', status: 'Upcoming' },
+    ],
+  };
+
+  function renderCalendar() {
+    document.getElementById('cal-month-label').textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const daysInPrev = new Date(currentYear, currentMonth, 0).getDate();
+
+    let html = '';
+    // prev month days
+    for (let i = firstDay - 1; i >= 0; i--) {
+      html += `<div class="calendar-cell"><div class="cal-day other-month">${daysInPrev - i}</div></div>`;
+    }
+    // current month days
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isSelected = selectedDate === dateStr;
+      const isToday = dateStr === '2026-03-16';
+      html += `<div class="calendar-cell">
+        <div class="cal-day ${isSelected ? 'selected' : ''} ${isToday && !isSelected ? 'today' : ''}"
+          onclick="selectDate('${dateStr}', ${d})">${d}</div>
+      </div>`;
+    }
+    // next month padding
+    const totalCells = firstDay + daysInMonth;
+    const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (let d = 1; d <= remaining; d++) {
+      html += `<div class="calendar-cell"><div class="cal-day other-month">${d}</div></div>`;
+    }
+    document.getElementById('cal-days').innerHTML = html;
+  }
+
+  function selectDate(dateStr, day) {
+    selectedDate = dateStr;
+    const label = `${MONTH_NAMES[currentMonth]} ${day}, ${currentYear}`;
+    document.getElementById('bookings-date-label').textContent = `Bookings for ${label}`;
+    const bookings = (BOOKING_DATA[dateStr] || []);
+    document.getElementById('bookings-count').textContent = `${bookings.length} bookings`;
+    const tbody = document.getElementById('cal-bookings-tbody');
+    if (bookings.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No bookings for this date</td></tr>';
+    } else {
+      tbody.innerHTML = bookings.map(b => `
+        <tr>
+          <td>${b.time}</td>
+          <td>${b.room}</td>
+          <td><strong>${b.student}</strong></td>
+          <td><span class="badge badge-blue">${b.status}</span></td>
+          <td>
+            <button class="btn btn-outline btn-sm" onclick="showToast('Checked in!','success')">Check In</button>
+          </td>
+        </tr>`).join('');
+    }
+    renderCalendar();
+  }
+
+  document.getElementById('prev-month').addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    renderCalendar();
+  });
+  document.getElementById('next-month').addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendar();
+  });
+
+  renderCalendar();
+  // Default select today-ish
+  selectDate('2026-03-14', 14);
+</script>
+</body>
+</html>

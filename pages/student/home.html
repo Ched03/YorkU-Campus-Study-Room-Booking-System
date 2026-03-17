@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YorkU Study Rooms – Home</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div style="padding:32px;max-width:1100px;">
+  <div class="page-header">
+    <h1 id="welcome-msg">Welcome back, John!</h1>
+    <p>Find and book study rooms, textbooks, and more.</p>
+  </div>
+
+  <!-- Quick stats -->
+  <div class="stats-row three" style="margin-bottom:28px;">
+    <div class="stat-card">
+      <div class="stat-label">Upcoming Bookings <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg></div>
+      <div class="stat-value">2</div>
+      <div class="stat-sub">Next: Room 104, Mar 13</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Available Rooms <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg></div>
+      <div class="stat-value green">12</div>
+      <div class="stat-sub">Out of 15 total rooms</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Computers Free <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0H3" /></svg></div>
+      <div class="stat-value green">8</div>
+      <div class="stat-sub">Floor 2 Computer Lab</div>
+    </div>
+  </div>
+
+  <!-- Quick action cards -->
+  <h2 class="section-title">Quick Actions</h2>
+  <div class="quick-actions">
+    <div class="quick-action-card" onclick="window.location.href='home.html'">
+      <div class="qa-icon red">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+      </div>
+      <h3>Book a Room</h3>
+      <p>Find and reserve available study rooms</p>
+    </div>
+    <div class="quick-action-card" onclick="window.location.href='my-bookings.html'">
+      <div class="qa-icon blue">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>
+      </div>
+      <h3>My Bookings</h3>
+      <p>View and manage your reservations</p>
+    </div>
+    <div class="quick-action-card" onclick="window.location.href='textbook-rentals.html'">
+      <div class="qa-icon green">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+      </div>
+      <h3>Textbook Rentals</h3>
+      <p>Reserve course textbooks</p>
+    </div>
+    <div class="quick-action-card" onclick="window.location.href='computer-lab.html'">
+      <div class="qa-icon yellow">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0H3" /></svg>
+      </div>
+      <h3>Computer Lab</h3>
+      <p>Access Floor 2 computers</p>
+    </div>
+  </div>
+
+  <!-- Room search preview -->
+  <h2 class="section-title" style="margin-top:32px;">Book a Study Room</h2>
+  <div class="filter-bar">
+    <div class="form-group">
+      <label class="form-label">Floor</label>
+      <select class="form-select" id="filter-floor">
+        <option>All Floors</option>
+        <option>Floor 1</option>
+        <option>Floor 2</option>
+        <option>Floor 3</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Capacity</label>
+      <select class="form-select" id="filter-cap">
+        <option>Any Capacity</option>
+        <option>1</option>
+        <option>4+</option>
+        <option>6+</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Time Slot</label>
+      <select class="form-select" id="filter-time">
+        <option>All Time Slots</option>
+        <option>8:00 AM</option><option>9:00 AM</option><option>10:00 AM</option>
+        <option>11:00 AM</option><option>12:00 PM</option><option>1:00 PM</option>
+        <option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Room Type</label>
+      <select class="form-select" id="filter-type">
+        <option>All Types</option>
+        <option>Individual</option>
+        <option>Group</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input class="form-input" type="date" id="filter-date" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">&nbsp;</label>
+      <button class="btn btn-primary" id="search-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+        Search Rooms
+      </button>
+    </div>
+  </div>
+
+  <div id="rooms-count" class="section-title">Available Rooms (15)</div>
+  <div class="rooms-grid" id="rooms-grid"></div>
+</div>
+
+<!-- Book Modal -->
+<div class="modal-overlay" id="book-modal">
+  <div class="modal">
+    <h2 class="modal-title" id="modal-room-title">Book Room 101</h2>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label class="form-label">Select Date</label>
+      <input class="form-input" type="date" id="modal-date" />
+    </div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label class="form-label">Select Time Slot</label>
+      <select class="form-select" id="modal-time">
+        <option>8:00 AM – 9:00 AM</option><option>9:00 AM – 10:00 AM</option>
+        <option>10:00 AM – 11:00 AM</option><option>11:00 AM – 12:00 PM</option>
+        <option>12:00 PM – 1:00 PM</option><option>1:00 PM – 2:00 PM</option>
+        <option>2:00 PM – 3:00 PM</option><option>3:00 PM – 4:00 PM</option>
+        <option>4:00 PM – 5:00 PM</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-confirm">Confirm Booking</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="../../js/shared.js"></script>
+<script>
+  const user = requireAuth('Student');
+  document.getElementById('nav-placeholder').innerHTML = buildStudentNav('Home');
+  document.getElementById('welcome-msg').textContent = `Welcome back, ${user.name.split(' ')[0]}!`;
+
+  // Set default date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('filter-date').value = today;
+  document.getElementById('modal-date').value = today;
+
+  let filteredRooms = [...ROOMS];
+  let selectedRoom = null;
+
+  function renderRooms(rooms) {
+    const grid = document.getElementById('rooms-grid');
+    document.getElementById('rooms-count').textContent = `Available Rooms (${rooms.length})`;
+    grid.innerHTML = rooms.map(r => {
+      const statusMap = { available: 'badge-green', booked: 'badge-blue', maintenance: 'badge-orange' };
+      const statusLabel = { available: 'Available', booked: 'Booked', maintenance: 'Maintenance' };
+      const canBook = r.status === 'available';
+      return `
+      <div class="room-card">
+        <div class="room-card-header">
+          <span class="room-card-title">${r.number}</span>
+          <span class="badge ${statusMap[r.status]}">${statusLabel[r.status]}</span>
+        </div>
+        <div class="room-card-meta">
+          <div class="room-meta-item">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;color:#bdbdbd"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" /></svg>
+            ${r.floor}
+          </div>
+          <div class="room-meta-item">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;color:#bdbdbd"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" /></svg>
+            Capacity: ${r.capacity}
+          </div>
+          <div class="room-meta-item">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;color:#bdbdbd"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+            Type: ${r.type}
+          </div>
+        </div>
+        <div class="room-card-actions">
+          <button class="btn btn-outline btn-sm">View Details</button>
+          <button class="btn btn-sm ${canBook ? 'btn-primary' : 'btn-disabled'}" 
+            ${canBook ? `onclick="openBookModal('${r.id}','${r.number}')"` : 'disabled'}>
+            Book Room
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function applyFilters() {
+    const floor = document.getElementById('filter-floor').value;
+    const cap = document.getElementById('filter-cap').value;
+    const type = document.getElementById('filter-type').value;
+    filteredRooms = ROOMS.filter(r => {
+      if (floor !== 'All Floors' && r.floor !== floor) return false;
+      if (type !== 'All Types' && r.type !== type) return false;
+      if (cap === '1' && r.capacity !== 1) return false;
+      if (cap === '4+' && r.capacity < 4) return false;
+      if (cap === '6+' && r.capacity < 6) return false;
+      return true;
+    });
+    renderRooms(filteredRooms);
+  }
+
+  function openBookModal(id, name) {
+    selectedRoom = id;
+    document.getElementById('modal-room-title').textContent = `Book ${name}`;
+    document.getElementById('book-modal').classList.add('open');
+  }
+
+  document.getElementById('search-btn').addEventListener('click', applyFilters);
+  document.getElementById('modal-cancel').addEventListener('click', () => {
+    document.getElementById('book-modal').classList.remove('open');
+  });
+  document.getElementById('book-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('book-modal'))
+      document.getElementById('book-modal').classList.remove('open');
+  });
+  document.getElementById('modal-confirm').addEventListener('click', () => {
+    document.getElementById('book-modal').classList.remove('open');
+    const room = ROOMS.find(r => r.id === selectedRoom);
+    if (room) room.status = 'booked';
+    showToast('Room booked successfully!', 'success');
+    applyFilters();
+  });
+
+  renderRooms(ROOMS);
+</script>
+</body>
+</html>

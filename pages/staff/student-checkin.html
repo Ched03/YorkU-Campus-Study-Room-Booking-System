@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YorkU Staff – Student Check-In</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-placeholder"></div>
+  <div class="main-with-sidebar">
+    <div style="background:#fff;padding:12px 24px;border-bottom:1px solid var(--border);font-size:0.82rem;color:var(--gray-500);">Staff Portal</div>
+    <div class="page-content">
+      <div class="page-header">
+        <h1>Student Check-In</h1>
+        <p>Check in students for their study room bookings</p>
+      </div>
+
+      <!-- Search student -->
+      <div class="card" style="margin-bottom:20px;">
+        <h2 class="section-title">Find Student Booking</h2>
+        <div style="display:flex;gap:12px;align-items:flex-end;">
+          <div class="form-group" style="flex:1;">
+            <label class="form-label">YorkU ID or Name</label>
+            <input class="form-input" id="search-id" placeholder="Enter student ID or name..." />
+          </div>
+          <button class="btn btn-primary" id="search-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+            Search
+          </button>
+        </div>
+      </div>
+
+      <!-- Today's check-in list -->
+      <div class="card">
+        <h2 class="section-title">Today's Bookings – Mar 16, 2026</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>YorkU ID</th>
+                <th>Room</th>
+                <th>Time</th>
+                <th>Check-In Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="checkin-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script src="../../js/shared.js"></script>
+<script>
+  requireAuth('Staff');
+  document.getElementById('sidebar-placeholder').innerHTML = buildSidebar('Staff', 'Student Check-In');
+
+  let checkIns = [
+    { student: 'John Smith', id: '123456789', room: 'Room 104', time: '10:00 – 11:00', checkedIn: false },
+    { student: 'John Smith', id: '123456789', room: 'Room 205', time: '13:00 – 14:00', checkedIn: false },
+    { student: 'Sarah Johnson', id: '234567890', room: 'Room 103', time: '11:00 – 12:00', checkedIn: true },
+  ];
+
+  function renderTable(data) {
+    document.getElementById('checkin-tbody').innerHTML = data.map((b, i) => `
+      <tr>
+        <td><strong>${b.student}</strong></td>
+        <td>${b.id}</td>
+        <td>${b.room}</td>
+        <td>${b.time}</td>
+        <td>
+          ${b.checkedIn
+            ? '<span class="badge badge-green">Checked In</span>'
+            : '<span class="badge badge-gray">Pending</span>'}
+        </td>
+        <td>
+          ${b.checkedIn
+            ? `<button class="btn btn-outline btn-sm" onclick="undoCheckin(${i})">Undo</button>`
+            : `<button class="btn btn-primary btn-sm" onclick="doCheckin(${i})">Check In</button>`}
+        </td>
+      </tr>`).join('');
+  }
+
+  function doCheckin(i) {
+    checkIns[i].checkedIn = true;
+    renderTable(checkIns);
+    showToast(`${checkIns[i].student} checked in!`, 'success');
+  }
+  function undoCheckin(i) {
+    checkIns[i].checkedIn = false;
+    renderTable(checkIns);
+    showToast('Check-in reversed.');
+  }
+
+  document.getElementById('search-btn').addEventListener('click', () => {
+    const q = document.getElementById('search-id').value.toLowerCase();
+    const filtered = checkIns.filter(b =>
+      b.student.toLowerCase().includes(q) || b.id.includes(q)
+    );
+    renderTable(filtered.length ? filtered : checkIns);
+    if (!filtered.length) showToast('No matching bookings found.');
+  });
+
+  renderTable(checkIns);
+</script>
+</body>
+</html>

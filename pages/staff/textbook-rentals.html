@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YorkU Staff – Textbook Rentals</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-placeholder"></div>
+  <div class="main-with-sidebar">
+    <div style="background:#fff;padding:12px 24px;border-bottom:1px solid var(--border);font-size:0.82rem;color:var(--gray-500);">Staff Portal</div>
+    <div class="page-content">
+      <div class="page-header">
+        <h1>Textbook Rental Management</h1>
+        <p>Manage textbook rentals and returns</p>
+      </div>
+
+      <div class="stats-row two" style="margin-bottom:24px;">
+        <div class="stat-card">
+          <div class="stat-label">Total Textbooks</div>
+          <div class="stat-value">4</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Currently Borrowed</div>
+          <div class="stat-value" id="borrowed-count">0</div>
+        </div>
+      </div>
+
+      <!-- Currently Borrowed -->
+      <div class="card" style="margin-bottom:20px;">
+        <h2 class="section-title">Currently Borrowed Textbooks</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Course Code</th>
+                <th>Borrowed By</th>
+                <th>Borrow Time</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="borrowed-tbody">
+              <tr class="empty-row"><td colspan="5">No textbooks currently borrowed</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- All Textbooks -->
+      <div class="card">
+        <h2 class="section-title">Available Textbooks</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Course Code</th>
+                <th>Author</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="avail-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script src="../../js/shared.js"></script>
+<script>
+  requireAuth('Staff');
+  document.getElementById('sidebar-placeholder').innerHTML = buildSidebar('Staff', 'Textbook Rentals');
+
+  let books = BOOKS.map(b => ({ ...b, borrowedBy: null, borrowTime: null }));
+
+  function renderTables() {
+    const borrowed = books.filter(b => b.borrowedBy);
+    document.getElementById('borrowed-count').textContent = borrowed.length;
+
+    const borrowedTbody = document.getElementById('borrowed-tbody');
+    borrowedTbody.innerHTML = borrowed.length ? borrowed.map(b => `
+      <tr>
+        <td><strong>${b.title}</strong></td>
+        <td>${b.course}</td>
+        <td>${b.borrowedBy}</td>
+        <td>${b.borrowTime}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="returnBook('${b.id}')">Mark Returned</button></td>
+      </tr>`).join('') : '<tr class="empty-row"><td colspan="5">No textbooks currently borrowed</td></tr>';
+
+    document.getElementById('avail-tbody').innerHTML = books.map(b => `
+      <tr>
+        <td>${b.title}</td>
+        <td>${b.course}</td>
+        <td>${b.author}</td>
+        <td><span class="badge ${b.status === 'available' ? 'badge-green' : 'badge-gray'}">${b.status === 'available' ? 'Available' : 'Borrowed'}</span></td>
+      </tr>`).join('');
+  }
+
+  function returnBook(id) {
+    const book = books.find(b => b.id === id);
+    if (book) {
+      book.status = 'available';
+      book.borrowedBy = null;
+      book.borrowTime = null;
+      showToast('Textbook marked as returned!', 'success');
+      renderTables();
+    }
+  }
+
+  renderTables();
+</script>
+</body>
+</html>

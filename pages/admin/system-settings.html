@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YorkU Admin – System Settings</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-placeholder"></div>
+  <div class="main-with-sidebar">
+    <div style="background:#fff;padding:12px 24px;border-bottom:1px solid var(--border);font-size:0.82rem;color:var(--gray-500);">Admin Portal</div>
+    <div class="page-content">
+      <div class="page-header">
+        <h1>System Settings</h1>
+        <p>Configure booking rules and system preferences</p>
+      </div>
+
+      <!-- Booking Rules -->
+      <div class="card" style="margin-bottom:20px;">
+        <h2 class="section-title">Booking Rules</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div class="form-group">
+            <label class="form-label">Max Bookings per Student (per day)</label>
+            <input class="form-input" type="number" id="max-bookings" value="2" min="1" max="10" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Booking Duration (hours)</label>
+            <select class="form-select" id="booking-duration">
+              <option>1 hour</option>
+              <option>2 hours</option>
+              <option>3 hours</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Booking Window (days in advance)</label>
+            <input class="form-input" type="number" id="booking-window" value="7" min="1" max="30" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cancellation Deadline (hours before)</label>
+            <input class="form-input" type="number" id="cancel-deadline" value="2" min="0" max="24" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Time Slots -->
+      <div class="card" style="margin-bottom:20px;">
+        <h2 class="section-title">Available Time Slots</h2>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;" id="time-slots-grid"></div>
+        <div style="margin-top:14px;display:flex;gap:10px;">
+          <button class="btn btn-outline btn-sm" id="select-all">Select All</button>
+          <button class="btn btn-outline btn-sm" id="deselect-all">Deselect All</button>
+        </div>
+      </div>
+
+      <!-- Maintenance Mode -->
+      <div class="card" style="margin-bottom:20px;">
+        <h2 class="section-title">System Status</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">Maintenance Mode</div>
+            <div style="font-size:0.8rem;color:var(--gray-500);">Disable all student bookings during maintenance</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="maintenance-toggle" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;">
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">Email Notifications</div>
+            <div style="font-size:0.8rem;color:var(--gray-500);">Send confirmation emails for new bookings</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="email-toggle" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:12px;">
+        <button class="btn btn-outline">Reset to Defaults</button>
+        <button class="btn btn-primary" onclick="saveSettings()">
+          Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<style>
+  .toggle-switch { position:relative; display:inline-block; width:46px; height:24px; }
+  .toggle-switch input { opacity:0; width:0; height:0; }
+  .toggle-slider {
+    position:absolute; cursor:pointer; inset:0;
+    background:var(--gray-300); border-radius:24px; transition:.3s;
+  }
+  .toggle-slider::before {
+    content:''; position:absolute; height:18px; width:18px;
+    left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.3s;
+    box-shadow:0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle-switch input:checked + .toggle-slider { background:var(--red); }
+  .toggle-switch input:checked + .toggle-slider::before { transform:translateX(22px); }
+</style>
+
+<script src="../../js/shared.js"></script>
+<script>
+  requireAuth('Admin');
+  document.getElementById('sidebar-placeholder').innerHTML = buildSidebar('Admin', 'System Settings');
+
+  const timeSlots = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','12:00 PM',
+    '1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM'];
+  let selected = new Set(timeSlots);
+
+  function renderSlots() {
+    document.getElementById('time-slots-grid').innerHTML = timeSlots.map(t => `
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid ${selected.has(t) ? 'var(--red)' : 'var(--border)'};border-radius:var(--radius);cursor:pointer;background:${selected.has(t) ? 'var(--red-light)' : 'var(--white)'};">
+        <input type="checkbox" ${selected.has(t) ? 'checked' : ''} onchange="toggleSlot('${t}',this.checked)" style="accent-color:var(--red);" />
+        <span style="font-size:0.82rem;font-weight:500;">${t}</span>
+      </label>`).join('');
+  }
+
+  function toggleSlot(t, v) {
+    if (v) selected.add(t); else selected.delete(t);
+    renderSlots();
+  }
+
+  document.getElementById('select-all').addEventListener('click', () => {
+    timeSlots.forEach(t => selected.add(t));
+    renderSlots();
+  });
+  document.getElementById('deselect-all').addEventListener('click', () => {
+    selected.clear();
+    renderSlots();
+  });
+
+  function saveSettings() {
+    showToast('Settings saved successfully!', 'success');
+  }
+
+  renderSlots();
+</script>
+</body>
+</html>
