@@ -123,6 +123,19 @@
   <div class="rooms-grid" id="rooms-grid"></div>
 </div>
 
+<!-- View Details Modal-->
+<div class= "modal-overlay" id="details-modal">
+  <div class="modal">
+    <h2 class="modal-title" id="modal-room-title">View Details</h2>
+      <img src="https://www.library.yorku.ca/web/wp-content/uploads/2023/03/thumbnail_IMG_2582-768x1024.jpg" 
+      alt="Study Room"/>
+      <br>
+      <h2 class="modal-title">Details:</h2>
+     <div class="modal-description" id="modal-room-description"> </div>
+     <div class="modal-descritpion" id="times-avaliable"></div>
+  </div>
+</div>
+
 <!-- Book Modal -->
 <div class="modal-overlay" id="book-modal">
   <div class="modal">
@@ -163,7 +176,7 @@
 
   let filteredRooms = [...ROOMS];
   let selectedRoom = null;
-
+  // Room Cards
   function renderRooms(rooms) {
     const grid = document.getElementById('rooms-grid');
     document.getElementById('rooms-count').textContent = `Available Rooms (${rooms.length})`;
@@ -192,7 +205,11 @@
           </div>
         </div>
         <div class="room-card-actions">
-          <button class="btn btn-outline btn-sm">View Details</button>
+          <button class="btn btn-outline btn-sm ${canBook ? 'btn-outline' : 'btn-disabled'}" 
+            ${canBook ? `onclick="openViewDetailsModal('${r.id}','${r.number}','${r.floor}','${r.capacity}','${r.type}','${r.time}')"` : 'disabled'}>
+          View Details
+          </button>
+
           <button class="btn btn-sm ${canBook ? 'btn-primary' : 'btn-disabled'}" 
             ${canBook ? `onclick="openBookModal('${r.id}','${r.number}')"` : 'disabled'}>
             Book Room
@@ -206,9 +223,11 @@
     const floor = document.getElementById('filter-floor').value;
     const cap = document.getElementById('filter-cap').value;
     const type = document.getElementById('filter-type').value;
+    const time = document.getElementById('filter-time').value;
     filteredRooms = ROOMS.filter(r => {
       if (floor !== 'All Floors' && r.floor !== floor) return false;
       if (type !== 'All Types' && r.type !== type) return false;
+      if (time !== 'All Time Slots' && !r.time.includes(time)) return false;
       if (cap === '1' && r.capacity !== 1) return false;
       if (cap === '4+' && r.capacity < 4) return false;
       if (cap === '6+' && r.capacity < 6) return false;
@@ -217,6 +236,22 @@
     renderRooms(filteredRooms);
   }
 
+  //View Details Modal Function
+  function openViewDetailsModal(id, name, floor, capacity, type, time) {
+    selectedRoom = id;
+    document.getElementById('modal-room-title').textContent = `${name}`;
+    document.getElementById('modal-room-description').textContent = `${floor} of the Second Student Centre, this study room is a ${type} study room and meant only for a maximum capacity of ${capacity}. `;
+    document.getElementById('times-avaliable').innerHTML = '<br><h3> Available Booking Times:</h3>'
+    document.getElementById('details-modal').classList.add('open');
+  }
+
+  document.getElementById('details-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('details-modal'))
+      document.getElementById('details-modal').classList.remove('open');
+  });
+  
+
+  //Book Room   Modal Function
   function openBookModal(id, name) {
     selectedRoom = id;
     document.getElementById('modal-room-title').textContent = `Book ${name}`;

@@ -266,6 +266,7 @@ input, select { font-family: var(--font); }
   color: var(--text);
   border: 1.5px solid var(--border);
 }
+.btn-outline:hover {background: var(--gray-300);}
 .btn-outline:hover { border-color: var(--gray-500); }
 .btn-sm { padding: 6px 14px; font-size: 0.82rem; }
 .btn-danger { background: var(--red); color: var(--white); }
@@ -692,6 +693,7 @@ tr:hover td { background: var(--gray-100); }
 }
 .modal-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 16px; }
 .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+.modal img { display: block; margin-left: auto; margin-right: auto; width: 250px; height: 250px}
 
 /* ===== TOAST ===== */
 .toast {
