@@ -691,6 +691,16 @@ tr:hover td { background: var(--gray-100); }
   width: 100%;
   box-shadow: 0 16px 48px rgba(0,0,0,0.2);
 }
+.modal ul {
+   background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  max-width: 480px;
+  width: 100%;
+  color: red;
+  font-weight: bold;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+}
 .modal-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 16px; }
 .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
 .modal img { display: block; margin-left: auto; margin-right: auto; width: 250px; height: 250px}

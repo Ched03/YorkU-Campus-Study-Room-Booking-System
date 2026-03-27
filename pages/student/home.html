@@ -133,6 +133,9 @@
       <h2 class="modal-title">Details:</h2>
      <div class="modal-description" id="modal-room-description"> </div>
      <div class="modal-descritpion" id="times-avaliable"></div>
+     <div class="modal-actions">
+      <button class="btn btn-outline" id="modal-exit">Exit</button>
+    </div>
   </div>
 </div>
 
@@ -241,7 +244,7 @@
     selectedRoom = id;
     document.getElementById('modal-room-title').textContent = `${name}`;
     document.getElementById('modal-room-description').textContent = `${floor} of the Second Student Centre, this study room is a ${type} study room and meant only for a maximum capacity of ${capacity}. `;
-    document.getElementById('times-avaliable').innerHTML = '<br><h3> Available Booking Times:</h3>'
+    document.getElementById('times-avaliable').innerHTML = '<br><h3> Available Booking Times:</h3><br><ul>' + time.split(',').map(t => `<li>${t}</li>`).join('') + '</ul>'; //split each item by , and then combine then into an array, place each item in a list and join them by ''
     document.getElementById('details-modal').classList.add('open');
   }
 
@@ -250,6 +253,10 @@
       document.getElementById('details-modal').classList.remove('open');
   });
   
+   document.getElementById('search-btn').addEventListener('click', applyFilters);
+  document.getElementById('modal-exit').addEventListener('click', () => {
+    document.getElementById('details-modal').classList.remove('open');
+  });
 
   //Book Room   Modal Function
   function openBookModal(id, name) {
