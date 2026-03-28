@@ -168,7 +168,7 @@
 
 <script src="../../js/shared.js"></script>
 <script>
-  const user = requireAuth('Student');
+  const user = requireAuth('Student');  // makes sure the user is logged in 
   document.getElementById('nav-placeholder').innerHTML = buildStudentNav('Home');
   document.getElementById('welcome-msg').textContent = `Welcome back, ${user.name.split(' ')[0]}!`;
 
@@ -264,8 +264,7 @@
     document.getElementById('modal-room-title').textContent = `Book ${name}`;
     document.getElementById('book-modal').classList.add('open');
   }
-
-  document.getElementById('search-btn').addEventListener('click', applyFilters);
+  
   document.getElementById('modal-cancel').addEventListener('click', () => {
     document.getElementById('book-modal').classList.remove('open');
   });
