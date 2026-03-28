@@ -89,17 +89,23 @@ function setCurrentUser(user) {
 
 function logout() {
   sessionStorage.removeItem('yorku_user');
-  window.location.href = '../index.html';
+  window.location.href = '../../index.html';
 }
 
 function requireAuth(expectedRole) {
   const user = getCurrentUser();
-  if (!user) { window.location.href = '../index.html'; return null; }
-  if (expectedRole && user.role !== expectedRole) {
-    alert('Access denied.');
-    window.location.href = '../index.html';
+
+  if (!user) {
+    window.location.href = '../../index.html';
     return null;
   }
+
+  if (expectedRole && user.role !== expectedRole) {
+    alert('Access denied.');
+    window.location.href = '../../index.html';
+    return null;
+  }
+
   return user;
 }
 
