@@ -7,138 +7,279 @@
   <link rel="stylesheet" href="../../css/styles.css" />
 </head>
 <body>
-<div id="nav-placeholder"></div>
 
-<div style="padding:32px;max-width:1100px;">
-  <div class="page-header">
-    <h1>My Bookings</h1>
-    <p>View and manage your study room bookings</p>
-  </div>
+  <!-- Student nav bar gets added here -->
+  <div id="nav-placeholder"></div>
 
-  <div class="card">
-    <h2 class="section-title">Booking History</h2>
-    <div class="tabs">
-      <button class="tab-btn active" id="tab-upcoming">Upcoming (2)</button>
-      <button class="tab-btn" id="tab-history">History (0)</button>
+  <!--
+    My bookings page
+    This page lets the student view upcoming bookings
+    and cancel them if needed.
+  -->
+
+  <div style="padding:32px; max-width:1100px;">
+
+    <!-- Page heading -->
+    <div class="page-header">
+      <h1>My Bookings</h1>
+      <p>View and manage your study room bookings</p>
     </div>
 
-    <div id="upcoming-content">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Room</th>
-              <th>Floor</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="booking-tbody"></tbody>
-        </table>
+    <!-- Main bookings card -->
+    <div class="card">
+      <h2 class="section-title">Booking History</h2>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-upcoming">Upcoming (2)</button>
+        <button class="tab-btn" id="tab-history">History (0)</button>
+      </div>
+
+      <!-- Upcoming bookings tab -->
+      <div id="upcoming-content">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Room</th>
+                <th>Floor</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <!-- Booking rows get added here -->
+            <tbody id="booking-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- History tab -->
+      <div id="history-content" style="display:none;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Room</th>
+                <th>Floor</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="empty-row">
+                <td colspan="5">No completed bookings yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Cancel booking modal -->
+  <div class="modal-overlay" id="cancel-modal">
+    <div class="modal">
+      <h2 class="modal-title">Cancel Booking</h2>
+
+      <p style="color:var(--gray-600); font-size:0.9rem;">
+        Are you sure you want to cancel this booking? This action cannot be undone.
+      </p>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="cancel-no">Keep Booking</button>
+        <button class="btn btn-danger" id="cancel-yes">Cancel Booking</button>
       </div>
     </div>
-
-    <div id="history-content" style="display:none;">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Room</th><th>Floor</th><th>Date</th><th>Time</th><th>Status</th></tr>
-          </thead>
-          <tbody>
-            <tr class="empty-row"><td colspan="5">No completed bookings yet.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
   </div>
-</div>
 
-<!-- Cancel Confirm Modal -->
-<div class="modal-overlay" id="cancel-modal">
-  <div class="modal">
-    <h2 class="modal-title">Cancel Booking</h2>
-    <p style="color:var(--gray-600);font-size:0.9rem;">Are you sure you want to cancel this booking? This action cannot be undone.</p>
-    <div class="modal-actions">
-      <button class="btn btn-outline" id="cancel-no">Keep Booking</button>
-      <button class="btn btn-danger" id="cancel-yes">Cancel Booking</button>
-    </div>
-  </div>
-</div>
-<div id="toast" class="toast"></div>
+  <div id="toast" class="toast"></div>
 
-<script src="../../js/shared.js"></script>
-<script>
-  requireAuth('Student');
-  document.getElementById('nav-placeholder').innerHTML = buildStudentNav('My Bookings');
+  <script src="../../js/shared.js"></script>
 
-  let myBookings = [
-    { room: 'Room 201', floor: 'Floor 2', date: 'Apr 1, 2026', time: '14:00 - 15:00', status: 'Upcoming' },
-  ];
-  let cancelIdx = null;
+  <script>
+    // make sure only student users can access this page
+    const user = requireAuth('Student');
 
-  function renderBookings() {
-    const tbody = document.getElementById('booking-tbody');
-    document.getElementById('tab-upcoming').textContent = `Upcoming (${myBookings.length})`;
-    if (myBookings.length === 0) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No upcoming bookings.</td></tr>';
-      return;
+    // load student nav
+    const navPlaceholder = document.getElementById('nav-placeholder');
+    navPlaceholder.innerHTML = buildStudentNav('My Bookings');
+
+    // store which booking is being cancelled
+    let cancelIdx = null;
+
+    // useful page elements
+    const bookingTbody = document.getElementById('booking-tbody');
+    const tabUpcoming = document.getElementById('tab-upcoming');
+    const tabHistory = document.getElementById('tab-history');
+    const upcomingContent = document.getElementById('upcoming-content');
+    const historyContent = document.getElementById('history-content');
+    const cancelModal = document.getElementById('cancel-modal');
+    const cancelYesBtn = document.getElementById('cancel-yes');
+    const cancelNoBtn = document.getElementById('cancel-no');
+
+    // get only the bookings for the current logged in student
+    function getMyBookings() {
+      const allBookings = getBookingsData();
+      let myBookings = [];
+
+      for (let i = 0; i < allBookings.length; i++) {
+        if (allBookings[i].studentId === user.id) {
+          myBookings.push(allBookings[i]);
+        }
+      }
+
+      return myBookings;
     }
-    tbody.innerHTML = myBookings.map((b, i) => `
-      <tr>
-        <td><strong>${b.room}</strong></td>
-        <td>${b.floor}</td>
-        <td>
-          <span style="display:flex;align-items:center;gap:6px;">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;color:#9e9e9e"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>
-            ${b.date}
-          </span>
-        </td>
-        <td>
-          <span style="display:flex;align-items:center;gap:6px;">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;color:#9e9e9e"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
-            ${b.time}
-          </span>
-        </td>
-        <td><span class="badge badge-blue">${b.status}</span></td>
-        <td><button class="btn btn-danger btn-sm" onclick="openCancel(${i})">Cancel</button></td>
-      </tr>`).join('');
-  }
 
-  function openCancel(i) {
-    cancelIdx = i;
-    document.getElementById('cancel-modal').classList.add('open');
-  }
+    // show bookings in the table
+    function renderBookings() {
+      const myBookings = getMyBookings();
 
-  document.getElementById('cancel-yes').addEventListener('click', () => {
-    myBookings.splice(cancelIdx, 1);
-    document.getElementById('cancel-modal').classList.remove('open');
+      // update tab number
+      tabUpcoming.textContent = 'Upcoming (' + myBookings.length + ')';
+
+      // if no bookings, show empty row
+      if (myBookings.length === 0) {
+        bookingTbody.innerHTML = `
+          <tr class="empty-row">
+            <td colspan="6">No upcoming bookings.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      let rowsHtml = '';
+
+      for (let i = 0; i < myBookings.length; i++) {
+        const booking = myBookings[i];
+
+        rowsHtml += `
+          <tr>
+            <td><strong>${booking.room}</strong></td>
+            <td>${booking.floor}</td>
+
+            <td>
+              <span style="display:flex; align-items:center; gap:6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;color:#9e9e9e">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                </svg>
+                ${booking.date}
+              </span>
+            </td>
+
+            <td>
+              <span style="display:flex; align-items:center; gap:6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;color:#9e9e9e">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                ${booking.time}
+              </span>
+            </td>
+
+            <td><span class="badge badge-blue">${booking.status}</span></td>
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="openCancel(${i})">
+                Cancel
+              </button>
+            </td>
+          </tr>
+        `;
+      }
+
+      bookingTbody.innerHTML = rowsHtml;
+    }
+
+    // open the cancel modal
+    function openCancel(index) {
+      cancelIdx = index;
+      cancelModal.classList.add('open');
+    }
+
+    // cancel the booking
+    cancelYesBtn.addEventListener('click', function() {
+      const allBookings = getBookingsData();
+      const myBookings = getMyBookings();
+      const bookingToCancel = myBookings[cancelIdx];
+
+      // safety check
+      if (!bookingToCancel) {
+        cancelModal.classList.remove('open');
+        return;
+      }
+
+      // remove the correct booking from saved data
+      let updatedBookings = [];
+
+      for (let i = 0; i < allBookings.length; i++) {
+        const booking = allBookings[i];
+
+        const sameBooking =
+          booking.studentId === bookingToCancel.studentId &&
+          booking.room === bookingToCancel.room &&
+          booking.date === bookingToCancel.date &&
+          booking.time === bookingToCancel.time;
+
+        if (!sameBooking) {
+          updatedBookings.push(booking);
+        }
+      }
+
+      // also reopen the room so room list stays updated
+      const rooms = getRoomsData();
+
+      for (let i = 0; i < rooms.length; i++) {
+        if (rooms[i].number === bookingToCancel.room) {
+          rooms[i].status = 'available';
+          break;
+        }
+      }
+
+      saveRoomsData(rooms);
+      saveBookingsData(updatedBookings);
+
+      cancelModal.classList.remove('open');
+      renderBookings();
+      showToast('Booking cancelled.', 'error');
+    });
+
+    // close modal without cancelling
+    cancelNoBtn.addEventListener('click', function() {
+      cancelModal.classList.remove('open');
+    });
+
+    // close modal when clicking outside
+    cancelModal.addEventListener('click', function(event) {
+      if (event.target === cancelModal) {
+        cancelModal.classList.remove('open');
+      }
+    });
+
+    // show upcoming tab
+    tabUpcoming.addEventListener('click', function() {
+      tabUpcoming.classList.add('active');
+      tabHistory.classList.remove('active');
+
+      upcomingContent.style.display = '';
+      historyContent.style.display = 'none';
+    });
+
+    // show history tab
+    tabHistory.addEventListener('click', function() {
+      tabHistory.classList.add('active');
+      tabUpcoming.classList.remove('active');
+
+      historyContent.style.display = '';
+      upcomingContent.style.display = 'none';
+    });
+
+    // first render when page loads
     renderBookings();
-    showToast('Booking cancelled.', 'error');
-  });
-  document.getElementById('cancel-no').addEventListener('click', () => {
-    document.getElementById('cancel-modal').classList.remove('open');
-  });
-  document.getElementById('cancel-modal').addEventListener('click', e => {
-    if (e.target === document.getElementById('cancel-modal'))
-      document.getElementById('cancel-modal').classList.remove('open');
-  });
+  </script>
 
-  document.getElementById('tab-upcoming').addEventListener('click', () => {
-    document.getElementById('tab-upcoming').classList.add('active');
-    document.getElementById('tab-history').classList.remove('active');
-    document.getElementById('upcoming-content').style.display = '';
-    document.getElementById('history-content').style.display = 'none';
-  });
-  document.getElementById('tab-history').addEventListener('click', () => {
-    document.getElementById('tab-history').classList.add('active');
-    document.getElementById('tab-upcoming').classList.remove('active');
-    document.getElementById('history-content').style.display = '';
-    document.getElementById('upcoming-content').style.display = 'none';
-  });
-
-  renderBookings();
-</script>
 </body>
 </html>

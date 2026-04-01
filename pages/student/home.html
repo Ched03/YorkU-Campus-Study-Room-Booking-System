@@ -168,53 +168,81 @@
 
 <script src="../../js/shared.js"></script>
 <script>
-  const user = requireAuth('Student');  // makes sure the user is logged in 
+  // making sure only student accounts can open this page
+  const user = requireAuth('Student');
   document.getElementById('nav-placeholder').innerHTML = buildStudentNav('Home');
   document.getElementById('welcome-msg').textContent = `Welcome back, ${user.name.split(' ')[0]}!`;
 
-  // Set default date
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('filter-date').value = today;
-  document.getElementById('modal-date').value = today;
+  // fixed demo date so the presentation flow matches the speaking notes
+  const DEMO_DATE = '2026-04-01';
+  document.getElementById('filter-date').value = DEMO_DATE;
+  document.getElementById('modal-date').value = DEMO_DATE;
 
-  let filteredRooms = [...ROOMS];
+  // these two variables get reused across the page
+  let filteredRooms = [];
   let selectedRoom = null;
-  // Room Cards
+
+  function getActiveRooms() {
+    // always read the newest room data from localStorage
+    return getRoomsData();
+  }
+
+  function updateSummaryCards() {
+    const rooms = getActiveRooms();
+    const availableCount = rooms.filter(room => room.status === 'available').length;
+    const upcomingCount = getBookingsData().filter(booking =>
+      booking.studentId === user.id && booking.status.toLowerCase() === 'upcoming'
+    ).length;
+
+    const statValues = document.querySelectorAll('.stat-value');
+    const statSubs = document.querySelectorAll('.stat-sub');
+
+    // card 1 = upcoming bookings
+    statValues[0].textContent = upcomingCount;
+    statSubs[0].textContent = upcomingCount > 0 ? 'Your next booking is saved below' : 'No upcoming bookings yet';
+
+    // card 2 = available rooms
+    statValues[1].textContent = availableCount;
+    statSubs[1].textContent = `Out of ${rooms.length} total rooms`;
+  }
+
   function renderRooms(rooms) {
     const grid = document.getElementById('rooms-grid');
     document.getElementById('rooms-count').textContent = `Available Rooms (${rooms.length})`;
-    grid.innerHTML = rooms.map(r => {
+
+    grid.innerHTML = rooms.map(room => {
       const statusMap = { available: 'badge-green', booked: 'badge-blue', maintenance: 'badge-orange' };
       const statusLabel = { available: 'Available', booked: 'Booked', maintenance: 'Maintenance' };
-      const canBook = r.status === 'available';
+      const canBook = room.status === 'available';
+
       return `
       <div class="room-card">
         <div class="room-card-header">
-          <span class="room-card-title">${r.number}</span>
-          <span class="badge ${statusMap[r.status]}">${statusLabel[r.status]}</span>
+          <span class="room-card-title">${room.number}</span>
+          <span class="badge ${statusMap[room.status]}">${statusLabel[room.status]}</span>
         </div>
         <div class="room-card-meta">
           <div class="room-meta-item">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;color:#bdbdbd"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" /></svg>
-            ${r.floor}
+            ${room.floor}
           </div>
           <div class="room-meta-item">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;color:#bdbdbd"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" /></svg>
-            Capacity: ${r.capacity}
+            Capacity: ${room.capacity}
           </div>
           <div class="room-meta-item">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;color:#bdbdbd"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
-            Type: ${r.type}
+            Type: ${room.type}
           </div>
         </div>
         <div class="room-card-actions">
-          <button class="btn btn-outline btn-sm ${canBook ? 'btn-outline' : 'btn-disabled'}" 
-            ${canBook ? `onclick="openViewDetailsModal('${r.id}','${r.number}','${r.floor}','${r.capacity}','${r.type}','${r.time}')"` : 'disabled'}>
-          View Details
+          <button class="btn btn-outline btn-sm ${canBook ? 'btn-outline' : 'btn-disabled'}"
+            ${canBook ? `onclick="openViewDetailsModal('${room.id}')"` : 'disabled'}>
+            View Details
           </button>
 
-          <button class="btn btn-sm ${canBook ? 'btn-primary' : 'btn-disabled'}" 
-            ${canBook ? `onclick="openBookModal('${r.id}','${r.number}')"` : 'disabled'}>
+          <button class="btn btn-sm ${canBook ? 'btn-primary' : 'btn-disabled'}"
+            ${canBook ? `onclick="openBookModal('${room.id}')"` : 'disabled'}>
             Book Room
           </button>
         </div>
@@ -223,64 +251,125 @@
   }
 
   function applyFilters() {
+    // grab all current filters from the page
     const floor = document.getElementById('filter-floor').value;
     const cap = document.getElementById('filter-cap').value;
     const type = document.getElementById('filter-type').value;
     const time = document.getElementById('filter-time').value;
-    filteredRooms = ROOMS.filter(r => {
-      if (floor !== 'All Floors' && r.floor !== floor) return false;
-      if (type !== 'All Types' && r.type !== type) return false;
-      if (time !== 'All Time Slots' && !r.time.includes(time)) return false;
-      if (cap === '1' && r.capacity !== 1) return false;
-      if (cap === '4+' && r.capacity < 4) return false;
-      if (cap === '6+' && r.capacity < 6) return false;
+
+    filteredRooms = getActiveRooms().filter(room => {
+      if (floor !== 'All Floors' && room.floor !== floor) return false;
+      if (type !== 'All Types' && room.type !== type) return false;
+      if (time !== 'All Time Slots' && !room.time.includes(time)) return false;
+      if (cap === '1' && room.capacity !== 1) return false;
+      if (cap === '4+' && room.capacity < 4) return false;
+      if (cap === '6+' && room.capacity < 6) return false;
       return true;
     });
+
     renderRooms(filteredRooms);
+    updateSummaryCards();
   }
 
-  //View Details Modal Function
-  function openViewDetailsModal(id, name, floor, capacity, type, time) {
-    selectedRoom = id;
-    document.getElementById('modal-room-title').textContent = `${name}`;
-    document.getElementById('modal-room-description').textContent = `${floor} of the Second Student Centre, this study room is a ${type} study room and meant only for a maximum capacity of ${capacity}. `;
-    document.getElementById('times-avaliable').innerHTML = '<br><h3> Available Booking Times:</h3><br><ul>' + time.split(',').map(t => `<li>${t}</li>`).join('') + '</ul>'; //split each item by , and then combine then into an array, place each item in a list and join them by ''
+  function openViewDetailsModal(roomId) {
+    const room = getActiveRooms().find(item => item.id === roomId);
+    if (!room) return;
+
+    selectedRoom = room.id;
+    document.querySelector('#details-modal #modal-room-title').textContent = room.number;
+    document.getElementById('modal-room-description').textContent = `${room.floor} of the Second Student Centre, this study room is a ${room.type} study room and meant only for a maximum capacity of ${room.capacity}.`;
+    document.getElementById('times-avaliable').innerHTML = '<br><h3>Available Booking Times:</h3><br><ul>' + room.time.map(time => `<li>${time}</li>`).join('') + '</ul>';
     document.getElementById('details-modal').classList.add('open');
   }
 
-  document.getElementById('details-modal').addEventListener('click', e => {
-    if (e.target === document.getElementById('details-modal'))
+  function fillBookingTimes(room) {
+    const select = document.getElementById('modal-time');
+
+    // important bug fix from the speaking notes:
+    // only show times that actually belong to this room
+    select.innerHTML = room.time.map(time => {
+      return `<option value="${time}">${convertStartTimeToRange(time)}</option>`;
+    }).join('');
+  }
+
+  function openBookModal(roomId) {
+    const room = getActiveRooms().find(item => item.id === roomId);
+    if (!room) return;
+
+    selectedRoom = room.id;
+    document.querySelector('#book-modal #modal-room-title').textContent = `Book ${room.number}`;
+    document.getElementById('modal-date').value = DEMO_DATE;
+    fillBookingTimes(room);
+    document.getElementById('book-modal').classList.add('open');
+  }
+
+  document.getElementById('details-modal').addEventListener('click', event => {
+    if (event.target === document.getElementById('details-modal')) {
       document.getElementById('details-modal').classList.remove('open');
+    }
   });
-  
-   document.getElementById('search-btn').addEventListener('click', applyFilters);
+
+  document.getElementById('search-btn').addEventListener('click', applyFilters);
+
   document.getElementById('modal-exit').addEventListener('click', () => {
     document.getElementById('details-modal').classList.remove('open');
   });
 
-  //Book Room   Modal Function
-  function openBookModal(id, name) {
-    selectedRoom = id;
-    document.getElementById('modal-room-title').textContent = `Book ${name}`;
-    document.getElementById('book-modal').classList.add('open');
-  }
-  
   document.getElementById('modal-cancel').addEventListener('click', () => {
     document.getElementById('book-modal').classList.remove('open');
   });
-  document.getElementById('book-modal').addEventListener('click', e => {
-    if (e.target === document.getElementById('book-modal'))
+
+  document.getElementById('book-modal').addEventListener('click', event => {
+    if (event.target === document.getElementById('book-modal')) {
       document.getElementById('book-modal').classList.remove('open');
+    }
   });
+
   document.getElementById('modal-confirm').addEventListener('click', () => {
+    const rooms = getActiveRooms();
+    const bookings = getBookingsData();
+    const room = rooms.find(item => item.id === selectedRoom);
+    const selectedDate = document.getElementById('modal-date').value;
+    const selectedTime = document.getElementById('modal-time').value;
+
+    if (!room) {
+      showToast('Room could not be found.', 'error');
+      return;
+    }
+
+    if (!selectedDate || !selectedTime) {
+      showToast('Please pick a date and time first.', 'error');
+      return;
+    }
+
+    // another safety check in case somebody changes the select manually
+    if (!room.time.includes(selectedTime)) {
+      showToast('Please choose one of the available times for this room.', 'error');
+      return;
+    }
+
+    room.status = 'booked';
+
+    bookings.unshift({
+      room: room.number,
+      floor: room.floor,
+      date: formatDisplayDate(selectedDate),
+      time: convertStartTimeToRange(selectedTime),
+      status: 'Upcoming',
+      student: user.name,
+      studentId: user.id,
+    });
+
+    saveRoomsData(rooms);
+    saveBookingsData(bookings);
+
     document.getElementById('book-modal').classList.remove('open');
-    const room = ROOMS.find(r => r.id === selectedRoom);
-    if (room) room.status = 'booked';
     showToast('Room booked successfully!', 'success');
     applyFilters();
   });
 
-  renderRooms(ROOMS);
+  // first page load
+  applyFilters();
 </script>
 </body>
 </html>

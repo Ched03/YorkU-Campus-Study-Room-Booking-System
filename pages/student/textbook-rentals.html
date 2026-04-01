@@ -7,89 +7,192 @@
   <link rel="stylesheet" href="../../css/styles.css" />
 </head>
 <body>
-<div id="nav-placeholder"></div>
 
-<div style="padding:32px;max-width:1100px;">
-  <div class="page-header">
-    <h1>Textbook Rental</h1>
-    <p>Reserve textbooks available on Floor 1</p>
-  </div>
+  <!-- Student nav bar gets added here -->
+  <div id="nav-placeholder"></div>
 
-  <div class="search-bar">
-    <div class="search-input-wrap">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;color:#bdbdbd"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
-      <input type="text" id="search-input" placeholder="Search by title, course code, or author..." />
+  <!--
+    Student textbook rental page
+    This page lets students search for textbooks
+    and reserve them if they are available.
+  -->
+
+  <div style="padding:32px; max-width:1100px;">
+
+    <!-- Page heading -->
+    <div class="page-header">
+      <h1>Textbook Rental</h1>
+      <p>Reserve textbooks available on Floor 1</p>
     </div>
-    <button class="btn btn-primary" id="search-btn">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
-      Search
-    </button>
+
+    <!-- Search bar -->
+    <div class="search-bar">
+
+      <div class="search-input-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;color:#bdbdbd">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+        </svg>
+
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search by title, course code, or author..." />
+      </div>
+
+      <button class="btn btn-primary" id="search-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+        </svg>
+        Search
+      </button>
+
+    </div>
+
+    <!-- Book cards get added here -->
+    <div class="books-grid" id="books-grid"></div>
   </div>
 
-  <div class="books-grid" id="books-grid"></div>
-</div>
+  <div id="toast" class="toast"></div>
 
-<div id="toast" class="toast"></div>
+  <script src="../../js/shared.js"></script>
 
-<script src="../../js/shared.js"></script>
-<script>
-  requireAuth('Student');
-  document.getElementById('nav-placeholder').innerHTML = buildStudentNav('Textbook Rentals');
+  <script>
+    // make sure only students can access this page
+    const user = requireAuth('Student');
 
-  let booksData = BOOKS.map(b => ({ ...b }));
+    // load the student nav bar
+    const navPlaceholder = document.getElementById('nav-placeholder');
+    navPlaceholder.innerHTML = buildStudentNav('Textbook Rentals');
 
-  function renderBooks(books) {
-    document.getElementById('books-grid').innerHTML = books.map(b => {
-      const avail = b.status === 'available';
-      return `
-      <div class="book-card">
-        <div class="book-header">
-          <div class="book-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:22px;height:22px;color:#c8102e"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+    let booksData = getBooksData();
+
+    // useful page elements
+    const booksGrid = document.getElementById('books-grid');
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+
+    // show all books on the page
+    function renderBooks(books) {
+      let booksHtml = '';
+
+      for (let i = 0; i < books.length; i++) {
+        const book = books[i];
+
+        let isAvailable = false;
+        let statusClass = '';
+        let dotClass = '';
+        let statusText = '';
+        let buttonClass = '';
+        let buttonText = '';
+        let buttonAction = '';
+
+        if (book.status === 'available') {
+          isAvailable = true;
+          statusClass = 'avail';
+          dotClass = 'green';
+          statusText = 'Available';
+          buttonClass = 'btn-primary';
+          buttonText = 'Reserve Textbook';
+          buttonAction = `onclick="reserveBook('${book.id}')"`
+        } else {
+          statusClass = 'unavail';
+          dotClass = 'red';
+          statusText = 'Unavailable';
+          buttonClass = 'btn-disabled';
+          buttonText = 'Currently Unavailable';
+          buttonAction = 'disabled';
+        }
+
+        booksHtml += `
+          <div class="book-card">
+            <div class="book-header">
+              <div class="book-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:22px;height:22px;color:#c8102e">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                </svg>
+              </div>
+
+              <div>
+                <div class="book-title">${book.title}</div>
+                <div class="book-course">${book.course}</div>
+              </div>
+            </div>
+
+            <div class="book-author">by ${book.author}</div>
+
+            <div class="book-status ${statusClass}">
+              <div class="status-dot ${dotClass}"></div>
+              ${statusText}
+            </div>
+
+            <button class="btn btn-full btn-sm ${buttonClass}" ${buttonAction}>
+              ${buttonText}
+            </button>
           </div>
-          <div>
-            <div class="book-title">${b.title}</div>
-            <div class="book-course">${b.course}</div>
-          </div>
-        </div>
-        <div class="book-author">by ${b.author}</div>
-        <div class="book-status ${avail ? 'avail' : 'unavail'}">
-          <div class="status-dot ${avail ? 'green' : 'red'}"></div>
-          ${avail ? 'Available' : 'Unavailable'}
-        </div>
-        <button class="btn btn-full btn-sm ${avail ? 'btn-primary' : 'btn-disabled'}"
-          ${avail ? `onclick="reserveBook('${b.id}')"` : 'disabled'}>
-          ${avail ? 'Reserve Textbook' : 'Currently Unavailable'}
-        </button>
-      </div>`;
-    }).join('');
-  }
+        `;
+      }
 
-  function reserveBook(id) {
-    const book = booksData.find(b => b.id === id);
-    if (book) {
-      book.status = 'unavailable';
-      showToast(`"${book.title}" reserved!`, 'success');
-      renderBooks(booksData);
+      booksGrid.innerHTML = booksHtml;
     }
-  }
 
-  function doSearch() {
-    const q = document.getElementById('search-input').value.toLowerCase();
-    const filtered = booksData.filter(b =>
-      b.title.toLowerCase().includes(q) ||
-      b.course.toLowerCase().includes(q) ||
-      b.author.toLowerCase().includes(q)
-    );
-    renderBooks(filtered);
-  }
+    // reserve a textbook
+    function reserveBook(id) {
+      let foundBook = null;
 
-  document.getElementById('search-btn').addEventListener('click', doSearch);
-  document.getElementById('search-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') doSearch();
-  });
+      for (let i = 0; i < booksData.length; i++) {
+        if (booksData[i].id === id) {
+          foundBook = booksData[i];
+          break;
+        }
+      }
 
-  renderBooks(booksData);
-</script>
+      if (foundBook) {
+        foundBook.status = 'unavailable';
+        foundBook.borrowedBy = user.name;
+        foundBook.borrowTime = 'Apr 1, 2026 - 11:00 AM';
+
+        saveBooksData(booksData);
+
+        showToast('"' + foundBook.title + '" reserved!', 'success');
+        renderBooks(booksData);
+      }
+    }
+
+    // search books by title, course, or author
+    function doSearch() {
+      const searchText = searchInput.value.toLowerCase();
+      let filteredBooks = [];
+
+      for (let i = 0; i < booksData.length; i++) {
+        const book = booksData[i];
+
+        const matchesTitle = book.title.toLowerCase().includes(searchText);
+        const matchesCourse = book.course.toLowerCase().includes(searchText);
+        const matchesAuthor = book.author.toLowerCase().includes(searchText);
+
+        if (matchesTitle || matchesCourse || matchesAuthor) {
+          filteredBooks.push(book);
+        }
+      }
+
+      renderBooks(filteredBooks);
+    }
+
+    // search when button is clicked
+    searchBtn.addEventListener('click', function() {
+      doSearch();
+    });
+
+    // search when enter key is pressed
+    searchInput.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        doSearch();
+      }
+    });
+
+    // first render when page loads
+    renderBooks(booksData);
+  </script>
+
 </body>
 </html>

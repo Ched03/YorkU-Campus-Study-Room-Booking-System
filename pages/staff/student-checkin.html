@@ -7,106 +7,195 @@
   <link rel="stylesheet" href="../../css/styles.css" />
 </head>
 <body>
-<div class="app-layout">
-  <div id="sidebar-placeholder"></div>
-  <div class="main-with-sidebar">
-    <div style="background:#fff;padding:12px 24px;border-bottom:1px solid var(--border);font-size:0.82rem;color:var(--gray-500);">Staff Portal</div>
-    <div class="page-content">
-      <div class="page-header">
-        <h1>Student Check-In</h1>
-        <p>Check in students for their study room bookings</p>
+
+  <!--
+    Staff student check-in page
+    This page lets staff search for a student booking
+    and mark students as checked in.
+  -->
+
+  <!-- Main page layout -->
+  <div class="app-layout">
+
+    <!-- Sidebar gets added here -->
+    <div id="sidebar-placeholder"></div>
+
+    <div class="main-with-sidebar">
+
+      <!-- Top strip -->
+      <div
+        style="background:#fff; padding:12px 24px; border-bottom:1px solid var(--border); font-size:0.82rem; color:var(--gray-500);">
+        Staff Portal
       </div>
 
-      <!-- Search student -->
-      <div class="card" style="margin-bottom:20px;">
-        <h2 class="section-title">Find Student Booking</h2>
-        <div style="display:flex;gap:12px;align-items:flex-end;">
-          <div class="form-group" style="flex:1;">
-            <label class="form-label">YorkU ID or Name</label>
-            <input class="form-input" id="search-id" placeholder="Enter student ID or name..." />
+      <div class="page-content">
+
+        <!-- Page heading -->
+        <div class="page-header">
+          <h1>Student Check-In</h1>
+          <p>Check in students for their study room bookings</p>
+        </div>
+
+        <!-- Search section -->
+        <div class="card" style="margin-bottom:20px;">
+          <h2 class="section-title">Find Student Booking</h2>
+
+          <div style="display:flex; gap:12px; align-items:flex-end;">
+
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">YorkU ID or Name</label>
+              <input
+                class="form-input"
+                id="search-id"
+                placeholder="Enter student ID or name..." />
+            </div>
+
+            <button class="btn btn-primary" id="search-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+              Search
+            </button>
+
           </div>
-          <button class="btn btn-primary" id="search-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
-            Search
-          </button>
         </div>
-      </div>
 
-      <!-- Today's check-in list -->
-      <div class="card">
-        <h2 class="section-title">Today's Bookings – Apr 1, 2026</h2>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>YorkU ID</th>
-                <th>Room</th>
-                <th>Time</th>
-                <th>Check-In Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="checkin-tbody"></tbody>
-          </table>
+        <!-- Today's check-in table -->
+        <div class="card">
+          <h2 class="section-title">Today's Bookings – Apr 1, 2026</h2>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>YorkU ID</th>
+                  <th>Room</th>
+                  <th>Time</th>
+                  <th>Check-In Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <!-- Rows will be added with JavaScript -->
+              <tbody id="checkin-tbody"></tbody>
+            </table>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
-</div>
-<div id="toast" class="toast"></div>
 
-<script src="../../js/shared.js"></script>
-<script>
-  requireAuth('Staff');
-  document.getElementById('sidebar-placeholder').innerHTML = buildSidebar('Staff', 'Student Check-In');
+  <div id="toast" class="toast"></div>
 
-  let checkIns = [
-    { student: 'John Smith', id: '123456789', room: 'Room 201', time: '14:00 – 15:00', checkedIn: false },
-    { student: 'Sarah Johnson', id: '234567890', room: 'Room 103', time: '11:00 – 12:00', checkedIn: true },
-  ];
+  <script src="../../js/shared.js"></script>
 
-  function renderTable(data) {
-    document.getElementById('checkin-tbody').innerHTML = data.map((b, i) => `
-      <tr>
-        <td><strong>${b.student}</strong></td>
-        <td>${b.id}</td>
-        <td>${b.room}</td>
-        <td>${b.time}</td>
-        <td>
-          ${b.checkedIn
-            ? '<span class="badge badge-green">Checked In</span>'
-            : '<span class="badge badge-gray">Pending</span>'}
-        </td>
-        <td>
-          ${b.checkedIn
-            ? `<button class="btn btn-outline btn-sm" onclick="undoCheckin(${i})">Undo</button>`
-            : `<button class="btn btn-primary btn-sm" onclick="doCheckin(${i})">Check In</button>`}
-        </td>
-      </tr>`).join('');
-  }
+  <script>
+    // make sure only staff can access this page
+    requireAuth('Staff');
 
-  function doCheckin(i) {
-    checkIns[i].checkedIn = true;
+    // load the sidebar
+    const sidebarPlaceholder = document.getElementById('sidebar-placeholder');
+    sidebarPlaceholder.innerHTML = buildSidebar('Staff', 'Student Check-In');
+
+    // sample check-in data
+    let checkIns = [
+      {
+        student: 'John Smith',
+        id: '123456789',
+        room: 'Room 201',
+        time: '14:00 – 15:00',
+        checkedIn: false
+      },
+      {
+        student: 'Sarah Johnson',
+        id: '234567890',
+        room: 'Room 103',
+        time: '11:00 – 12:00',
+        checkedIn: true
+      }
+    ];
+
+    // useful page elements
+    const checkinTbody = document.getElementById('checkin-tbody');
+    const searchBtn = document.getElementById('search-btn');
+    const searchInput = document.getElementById('search-id');
+
+    // show rows in the table
+    function renderTable(data) {
+      let rowsHtml = '';
+
+      for (let i = 0; i < data.length; i++) {
+        const booking = data[i];
+
+        let statusHtml = '';
+        let actionHtml = '';
+
+        if (booking.checkedIn) {
+          statusHtml = '<span class="badge badge-green">Checked In</span>';
+          actionHtml = '<button class="btn btn-outline btn-sm" onclick="undoCheckin(' + i + ')">Undo</button>';
+        } else {
+          statusHtml = '<span class="badge badge-gray">Pending</span>';
+          actionHtml = '<button class="btn btn-primary btn-sm" onclick="doCheckin(' + i + ')">Check In</button>';
+        }
+
+        rowsHtml += `
+          <tr>
+            <td><strong>${booking.student}</strong></td>
+            <td>${booking.id}</td>
+            <td>${booking.room}</td>
+            <td>${booking.time}</td>
+            <td>${statusHtml}</td>
+            <td>${actionHtml}</td>
+          </tr>
+        `;
+      }
+
+      checkinTbody.innerHTML = rowsHtml;
+    }
+
+    // mark a student as checked in
+    function doCheckin(i) {
+      checkIns[i].checkedIn = true;
+      renderTable(checkIns);
+      showToast(checkIns[i].student + ' checked in!', 'success');
+    }
+
+    // undo a check-in
+    function undoCheckin(i) {
+      checkIns[i].checkedIn = false;
+      renderTable(checkIns);
+      showToast('Check-in reversed.');
+    }
+
+    // search by name or ID
+    searchBtn.addEventListener('click', function() {
+      const searchText = searchInput.value.toLowerCase();
+      let filtered = [];
+
+      for (let i = 0; i < checkIns.length; i++) {
+        const booking = checkIns[i];
+
+        const matchesName = booking.student.toLowerCase().includes(searchText);
+        const matchesId = booking.id.includes(searchText);
+
+        if (matchesName || matchesId) {
+          filtered.push(booking);
+        }
+      }
+
+      if (filtered.length > 0) {
+        renderTable(filtered);
+      } else {
+        renderTable(checkIns);
+        showToast('No matching bookings found.');
+      }
+    });
+
+    // first table render when page loads
     renderTable(checkIns);
-    showToast(`${checkIns[i].student} checked in!`, 'success');
-  }
-  function undoCheckin(i) {
-    checkIns[i].checkedIn = false;
-    renderTable(checkIns);
-    showToast('Check-in reversed.');
-  }
+  </script>
 
-  document.getElementById('search-btn').addEventListener('click', () => {
-    const q = document.getElementById('search-id').value.toLowerCase();
-    const filtered = checkIns.filter(b =>
-      b.student.toLowerCase().includes(q) || b.id.includes(q)
-    );
-    renderTable(filtered.length ? filtered : checkIns);
-    if (!filtered.length) showToast('No matching bookings found.');
-  });
-
-  renderTable(checkIns);
-</script>
 </body>
 </html>

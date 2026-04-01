@@ -1,4 +1,9 @@
-// ===== SHARED DATA =====
+// ==================================================
+// Shared demo data for the whole project
+// We kept this file simple on purpose so it still feels
+// like normal student project code and is easy to explain
+// during the presentation.
+// ==================================================
 const ROOMS = [
   { id: 'r101', number: 'Room 101', floor: 'Floor 1', capacity: 1, type: 'Individual', status: 'available', time: ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM'] },
   { id: 'r102', number: 'Room 102', floor: 'Floor 1', capacity: 1, type: 'Individual', status: 'available', time: ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM'] },
@@ -48,6 +53,118 @@ const BOOKINGS = [
 
 const TIME_SLOTS = ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
   '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM'];
+
+
+// ==================================================
+// Small localStorage helpers
+// We added these so changes made during the demo
+// (like booking a room or cancelling one) can carry
+// over between pages without changing the UI.
+// ==================================================
+const STORAGE_KEYS = {
+  rooms: 'yorku_rooms_data',
+  bookings: 'yorku_bookings_data',
+  books: 'yorku_books_data',
+};
+
+function readJSON(key, fallbackValue) {
+  const raw = localStorage.getItem(key);
+  if (!raw) return fallbackValue;
+
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    console.log('Could not parse saved data, using fallback instead.', error);
+    return fallbackValue;
+  }
+}
+
+function writeJSON(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function getRoomsData() {
+  return readJSON(STORAGE_KEYS.rooms, ROOMS);
+}
+
+function saveRoomsData(rooms) {
+  writeJSON(STORAGE_KEYS.rooms, rooms);
+}
+
+function getBookingsData() {
+  return readJSON(STORAGE_KEYS.bookings, BOOKINGS);
+}
+
+function saveBookingsData(bookings) {
+  writeJSON(STORAGE_KEYS.bookings, bookings);
+}
+
+function getBooksData() {
+  return readJSON(STORAGE_KEYS.books, BOOKS).map(function(book) {
+    return {
+      ...book,
+      borrowedBy: book.borrowedBy || null,
+      borrowTime: book.borrowTime || null
+    };
+  });
+}
+
+function saveBooksData(books) {
+  writeJSON(STORAGE_KEYS.books, books);
+}
+
+function seedDemoData() {
+  // only seed once so later page actions are not overwritten
+  if (!localStorage.getItem(STORAGE_KEYS.rooms)) {
+    saveRoomsData(ROOMS);
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.bookings)) {
+    saveBookingsData(BOOKINGS);
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.books)) {
+    const startingBooks = BOOKS.map(function(book) {
+      return {
+        ...book,
+        borrowedBy: null,
+        borrowTime: null
+      };
+    });
+
+    // demo setup: Sarah already has Business Data Communications and Networking
+    for (let i = 0; i < startingBooks.length; i++) {
+      if (startingBooks[i].course === 'ITEC 3210') {
+        startingBooks[i].status = 'unavailable';
+        startingBooks[i].borrowedBy = 'Sarah Johnson';
+        startingBooks[i].borrowTime = 'Apr 1, 2026 - 10:30 AM';
+      }
+    }
+
+    saveBooksData(startingBooks);
+  }
+}
+
+function formatDisplayDate(dateValue) {
+  if (!dateValue) return '';
+
+  const date = new Date(dateValue + 'T00:00:00');
+  return date.toLocaleDateString('en-CA', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function convertStartTimeToRange(startTime) {
+  const index = TIME_SLOTS.indexOf(startTime);
+  if (index === -1) return startTime;
+
+  const endTime = TIME_SLOTS[index + 1] || TIME_SLOTS[index];
+  return `${startTime} - ${endTime}`;
+}
+
+seedDemoData();
 
 // ===== SVG ICONS =====
 const icons = {

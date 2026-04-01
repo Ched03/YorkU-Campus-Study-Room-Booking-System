@@ -52,6 +52,7 @@
 <script src="js/shared.js"></script>
 <script>
   // Quick credential map
+  // We left this fake login setup simple since this is a front-end class demo.
   const CREDENTIALS = {
     '123456789': { name: 'John Smith', id: '123456789', role: 'Student', email: 'jsmith@yorku.ca' },
     '234567890': { name: 'Sarah Johnson', id: '234567890', role: 'Student', email: 'sjohnson@yorku.ca' },
@@ -60,6 +61,7 @@
   };
 
   function doLogin(id) {
+    // Basic front-end validation only for demo purposes
     const user = CREDENTIALS[id];
     if (!user) {
       const err = document.getElementById('error-msg');

@@ -7,201 +7,335 @@
   <link rel="stylesheet" href="../../css/styles.css" />
 </head>
 <body>
-<div class="app-layout">
-  <div id="sidebar-placeholder"></div>
-  <div class="main-with-sidebar">
-    <div style="background:#fff;padding:12px 24px;border-bottom:1px solid var(--border);font-size:0.82rem;color:var(--gray-500);">Admin Portal</div>
-    <div class="page-content">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;">
-        <div class="page-header" style="margin-bottom:0;">
-          <h1>Room Management</h1>
-          <p>Add, edit, or remove study rooms</p>
-        </div>
-        <button class="btn btn-primary" id="add-room-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-          Add Room
-        </button>
+
+  <!--
+    Admin room management page
+    This page lets the admin add, edit, and delete study rooms.
+    It also shows all rooms in a table.
+  -->
+
+  <!-- Main page layout -->
+  <div class="app-layout">
+
+    <!-- Sidebar goes here -->
+    <div id="sidebar-placeholder"></div>
+
+    <div class="main-with-sidebar">
+
+      <!-- Small top strip -->
+      <div
+        style="background:#fff; padding:12px 24px; border-bottom:1px solid var(--border); font-size:0.82rem; color:var(--gray-500);">
+        Admin Portal
       </div>
 
-      <div class="card">
-        <h2 class="section-title" id="rooms-section-title">All Study Rooms (15)</h2>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Room Number</th>
-                <th>Floor</th>
-                <th>Capacity</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="rooms-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+      <div class="page-content">
 
-<!-- Add/Edit Modal -->
-<div class="modal-overlay" id="room-modal">
-  <div class="modal">
-    <h2 class="modal-title" id="room-modal-title">Add Room</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-      <div class="form-group">
-        <label class="form-label">Room Number</label>
-        <input class="form-input" id="m-number" placeholder="e.g. Room 106" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Floor</label>
-        <select class="form-select" id="m-floor">
-          <option>Floor 1</option>
-          <option>Floor 2</option>
-          <option>Floor 3</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Capacity</label>
-        <input class="form-input" id="m-cap" type="number" min="1" max="20" value="1" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Type</label>
-        <select class="form-select" id="m-type">
-          <option>Individual</option>
-          <option>Group</option>
-        </select>
-      </div>
-      <div class="form-group" style="grid-column:1/-1;">
-        <label class="form-label">Status</label>
-        <select class="form-select" id="m-status">
-          <option value="available">Available</option>
-          <option value="booked">Booked</option>
-          <option value="maintenance">Maintenance</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" id="room-modal-cancel">Cancel</button>
-      <button class="btn btn-primary" id="room-modal-save">Save Room</button>
-    </div>
-  </div>
-</div>
+        <!-- Page heading and add room button -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px;">
 
-<!-- Delete Confirm Modal -->
-<div class="modal-overlay" id="delete-modal">
-  <div class="modal">
-    <h2 class="modal-title">Delete Room</h2>
-    <p style="color:var(--gray-600);font-size:0.9rem;">Are you sure you want to delete <strong id="delete-room-name"></strong>? This cannot be undone.</p>
-    <div class="modal-actions">
-      <button class="btn btn-outline" id="delete-cancel">Cancel</button>
-      <button class="btn btn-danger" id="delete-confirm">Delete Room</button>
-    </div>
-  </div>
-</div>
+          <div class="page-header" style="margin-bottom:0;">
+            <h1>Room Management</h1>
+            <p>Add, edit, or remove study rooms</p>
+          </div>
 
-<div id="toast" class="toast"></div>
-
-<script src="../../js/shared.js"></script>
-<script>
-  requireAuth('Admin');
-  document.getElementById('sidebar-placeholder').innerHTML = buildSidebar('Admin', 'Room Management');
-
-  let adminRooms = ROOMS.map(r => ({ ...r }));
-  let editIdx = null;
-  let deleteIdx = null;
-
-  function renderRooms() {
-    document.getElementById('rooms-section-title').textContent = `All Study Rooms (${adminRooms.length})`;
-    document.getElementById('rooms-tbody').innerHTML = adminRooms.map((r, i) => {
-      const statusMap = { available: 'badge-green', booked: 'badge-blue', maintenance: 'badge-orange' };
-      const statusLabel = { available: 'Available', booked: 'Booked', maintenance: 'Maintenance' };
-      return `
-      <tr>
-        <td><strong>${r.number}</strong></td>
-        <td>${r.floor}</td>
-        <td>${r.capacity}</td>
-        <td>${r.type}</td>
-        <td><span class="badge ${statusMap[r.status]}">${statusLabel[r.status]}</span></td>
-        <td>
-          <button class="table-action-btn edit" onclick="openEdit(${i})" title="Edit">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
+          <button class="btn btn-primary" id="add-room-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Add Room
           </button>
-          <button class="table-action-btn delete" onclick="openDelete(${i})" title="Delete">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
-          </button>
-        </td>
-      </tr>`;
-    }).join('');
-  }
 
-  function openEdit(i) {
-    editIdx = i;
-    const r = adminRooms[i];
-    document.getElementById('room-modal-title').textContent = 'Edit Room';
-    document.getElementById('m-number').value = r.number;
-    document.getElementById('m-floor').value = r.floor;
-    document.getElementById('m-cap').value = r.capacity;
-    document.getElementById('m-type').value = r.type;
-    document.getElementById('m-status').value = r.status;
-    document.getElementById('room-modal').classList.add('open');
-  }
+        </div>
 
-  function openDelete(i) {
-    deleteIdx = i;
-    document.getElementById('delete-room-name').textContent = adminRooms[i].number;
-    document.getElementById('delete-modal').classList.add('open');
-  }
+        <!-- Card that holds the full room table -->
+        <div class="card">
+          <h2 class="section-title" id="rooms-section-title">All Study Rooms (15)</h2>
 
-  document.getElementById('add-room-btn').addEventListener('click', () => {
-    editIdx = null;
-    document.getElementById('room-modal-title').textContent = 'Add Room';
-    document.getElementById('m-number').value = '';
-    document.getElementById('m-floor').value = 'Floor 1';
-    document.getElementById('m-cap').value = 1;
-    document.getElementById('m-type').value = 'Individual';
-    document.getElementById('m-status').value = 'available';
-    document.getElementById('room-modal').classList.add('open');
-  });
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Room Number</th>
+                  <th>Floor</th>
+                  <th>Capacity</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
 
-  document.getElementById('room-modal-cancel').addEventListener('click', () => {
-    document.getElementById('room-modal').classList.remove('open');
-  });
+              <!-- Table rows will be added using JavaScript -->
+              <tbody id="rooms-tbody"></tbody>
+            </table>
+          </div>
+        </div>
 
-  document.getElementById('room-modal-save').addEventListener('click', () => {
-    const newRoom = {
-      number: document.getElementById('m-number').value || 'Room ???',
-      floor: document.getElementById('m-floor').value,
-      capacity: parseInt(document.getElementById('m-cap').value),
-      type: document.getElementById('m-type').value,
-      status: document.getElementById('m-status').value,
-    };
-    if (editIdx !== null) {
-      adminRooms[editIdx] = { ...adminRooms[editIdx], ...newRoom };
-      showToast('Room updated!', 'success');
-    } else {
-      adminRooms.push({ id: 'r_new_' + Date.now(), ...newRoom });
-      showToast('Room added!', 'success');
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Room Modal -->
+  <div class="modal-overlay" id="room-modal">
+    <div class="modal">
+
+      <h2 class="modal-title" id="room-modal-title">Add Room</h2>
+
+      <!-- Form fields for room info -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+
+        <div class="form-group">
+          <label class="form-label">Room Number</label>
+          <input class="form-input" id="m-number" placeholder="e.g. Room 106" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Floor</label>
+          <select class="form-select" id="m-floor">
+            <option>Floor 1</option>
+            <option>Floor 2</option>
+            <option>Floor 3</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Capacity</label>
+          <input class="form-input" id="m-cap" type="number" min="1" max="20" value="1" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select class="form-select" id="m-type">
+            <option>Individual</option>
+            <option>Group</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Status</label>
+          <select class="form-select" id="m-status">
+            <option value="available">Available</option>
+            <option value="booked">Booked</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Modal buttons -->
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="room-modal-cancel">Cancel</button>
+        <button class="btn btn-primary" id="room-modal-save">Save Room</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Delete confirmation modal -->
+  <div class="modal-overlay" id="delete-modal">
+    <div class="modal">
+
+      <h2 class="modal-title">Delete Room</h2>
+
+      <p style="color:var(--gray-600); font-size:0.9rem;">
+        Are you sure you want to delete <strong id="delete-room-name"></strong>? This cannot be undone.
+      </p>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="delete-cancel">Cancel</button>
+        <button class="btn btn-danger" id="delete-confirm">Delete Room</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast message -->
+  <div id="toast" class="toast"></div>
+
+  <script src="../../js/shared.js"></script>
+
+  <script>
+    // make sure only admin users can open this page
+    requireAuth('Admin');
+
+    // load sidebar
+    const sidebarPlaceholder = document.getElementById('sidebar-placeholder');
+    sidebarPlaceholder.innerHTML = buildSidebar('Admin', 'Room Management');
+
+    // copy room data so changes here do not directly change the original array
+    let adminRooms = ROOMS.map(function(room) {
+      return {
+        ...room
+      };
+    });
+
+    // keep track of which room is being edited or deleted
+    let editIdx = null;
+    let deleteIdx = null;
+
+    // useful element references
+    const roomsSectionTitle = document.getElementById('rooms-section-title');
+    const roomsTbody = document.getElementById('rooms-tbody');
+
+    const roomModal = document.getElementById('room-modal');
+    const deleteModal = document.getElementById('delete-modal');
+
+    const roomModalTitle = document.getElementById('room-modal-title');
+    const deleteRoomName = document.getElementById('delete-room-name');
+
+    const roomNumberInput = document.getElementById('m-number');
+    const roomFloorInput = document.getElementById('m-floor');
+    const roomCapInput = document.getElementById('m-cap');
+    const roomTypeInput = document.getElementById('m-type');
+    const roomStatusInput = document.getElementById('m-status');
+
+    const addRoomBtn = document.getElementById('add-room-btn');
+    const roomModalCancelBtn = document.getElementById('room-modal-cancel');
+    const roomModalSaveBtn = document.getElementById('room-modal-save');
+    const deleteCancelBtn = document.getElementById('delete-cancel');
+    const deleteConfirmBtn = document.getElementById('delete-confirm');
+
+    // show all rooms in the table
+    function renderRooms() {
+      roomsSectionTitle.textContent = 'All Study Rooms (' + adminRooms.length + ')';
+
+      let rowsHtml = '';
+
+      for (let i = 0; i < adminRooms.length; i++) {
+        const room = adminRooms[i];
+
+        let badgeClass = '';
+        let statusLabel = '';
+
+        if (room.status === 'available') {
+          badgeClass = 'badge-green';
+          statusLabel = 'Available';
+        } else if (room.status === 'booked') {
+          badgeClass = 'badge-blue';
+          statusLabel = 'Booked';
+        } else if (room.status === 'maintenance') {
+          badgeClass = 'badge-orange';
+          statusLabel = 'Maintenance';
+        }
+
+        rowsHtml += `
+          <tr>
+            <td><strong>${room.number}</strong></td>
+            <td>${room.floor}</td>
+            <td>${room.capacity}</td>
+            <td>${room.type}</td>
+            <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
+            <td>
+              <button class="table-action-btn edit" onclick="openEdit(${i})" title="Edit">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
+                </svg>
+              </button>
+
+              <button class="table-action-btn delete" onclick="openDelete(${i})" title="Delete">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+        `;
+      }
+
+      roomsTbody.innerHTML = rowsHtml;
     }
-    document.getElementById('room-modal').classList.remove('open');
+
+    // open modal to edit an existing room
+    function openEdit(i) {
+      editIdx = i;
+
+      const room = adminRooms[i];
+
+      roomModalTitle.textContent = 'Edit Room';
+      roomNumberInput.value = room.number;
+      roomFloorInput.value = room.floor;
+      roomCapInput.value = room.capacity;
+      roomTypeInput.value = room.type;
+      roomStatusInput.value = room.status;
+
+      roomModal.classList.add('open');
+    }
+
+    // open delete confirmation modal
+    function openDelete(i) {
+      deleteIdx = i;
+      deleteRoomName.textContent = adminRooms[i].number;
+      deleteModal.classList.add('open');
+    }
+
+    // open modal for adding a new room
+    addRoomBtn.addEventListener('click', function() {
+      editIdx = null;
+
+      roomModalTitle.textContent = 'Add Room';
+      roomNumberInput.value = '';
+      roomFloorInput.value = 'Floor 1';
+      roomCapInput.value = 1;
+      roomTypeInput.value = 'Individual';
+      roomStatusInput.value = 'available';
+
+      roomModal.classList.add('open');
+    });
+
+    // close add/edit modal
+    roomModalCancelBtn.addEventListener('click', function() {
+      roomModal.classList.remove('open');
+    });
+
+    // save room after adding or editing
+    roomModalSaveBtn.addEventListener('click', function() {
+      const newRoom = {
+        number: roomNumberInput.value || 'Room ???',
+        floor: roomFloorInput.value,
+        capacity: parseInt(roomCapInput.value),
+        type: roomTypeInput.value,
+        status: roomStatusInput.value
+      };
+
+      if (editIdx !== null) {
+        adminRooms[editIdx] = {
+          ...adminRooms[editIdx],
+          ...newRoom
+        };
+
+        showToast('Room updated!', 'success');
+      } else {
+        adminRooms.push({
+          id: 'r_new_' + Date.now(),
+          ...newRoom
+        });
+
+        showToast('Room added!', 'success');
+      }
+
+      roomModal.classList.remove('open');
+      renderRooms();
+    });
+
+    // close delete modal
+    deleteCancelBtn.addEventListener('click', function() {
+      deleteModal.classList.remove('open');
+    });
+
+    // delete selected room
+    deleteConfirmBtn.addEventListener('click', function() {
+      const roomName = adminRooms[deleteIdx].number;
+
+      adminRooms.splice(deleteIdx, 1);
+
+      deleteModal.classList.remove('open');
+      showToast(roomName + ' deleted.', 'error');
+
+      renderRooms();
+    });
+
+    // first render when page loads
     renderRooms();
-  });
+  </script>
 
-  document.getElementById('delete-cancel').addEventListener('click', () => {
-    document.getElementById('delete-modal').classList.remove('open');
-  });
-
-  document.getElementById('delete-confirm').addEventListener('click', () => {
-    const name = adminRooms[deleteIdx].number;
-    adminRooms.splice(deleteIdx, 1);
-    document.getElementById('delete-modal').classList.remove('open');
-    showToast(`${name} deleted.`, 'error');
-    renderRooms();
-  });
-
-
-  renderRooms();
-</script>
 </body>
 </html>

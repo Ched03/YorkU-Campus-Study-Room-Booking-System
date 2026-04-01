@@ -7,112 +7,220 @@
   <link rel="stylesheet" href="../../css/styles.css" />
 </head>
 <body>
-<div class="app-layout">
-  <div id="sidebar-placeholder"></div>
-  <div class="main-with-sidebar">
-    <div style="background:#fff;padding:12px 24px;border-bottom:1px solid var(--border);font-size:0.82rem;color:var(--gray-500);">Staff Portal</div>
-    <div class="page-content">
-      <div class="page-header">
-        <h1>Textbook Rental Management</h1>
-        <p>Manage textbook rentals and returns</p>
+
+  <!--
+    Staff textbook rental page
+    This page shows which textbooks are borrowed
+    and which ones are currently available.
+  -->
+
+  <!-- Main page layout -->
+  <div class="app-layout">
+
+    <!-- Sidebar will be added here -->
+    <div id="sidebar-placeholder"></div>
+
+    <div class="main-with-sidebar">
+
+      <!-- Top strip -->
+      <div
+        style="background:#fff; padding:12px 24px; border-bottom:1px solid var(--border); font-size:0.82rem; color:var(--gray-500);">
+        Staff Portal
       </div>
 
-      <div class="stats-row two" style="margin-bottom:24px;">
-        <div class="stat-card">
-          <div class="stat-label">Total Textbooks</div>
-          <div class="stat-value">4</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Currently Borrowed</div>
-          <div class="stat-value" id="borrowed-count">0</div>
-        </div>
-      </div>
+      <div class="page-content">
 
-      <!-- Currently Borrowed -->
-      <div class="card" style="margin-bottom:20px;">
-        <h2 class="section-title">Currently Borrowed Textbooks</h2>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Course Code</th>
-                <th>Borrowed By</th>
-                <th>Borrow Time</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="borrowed-tbody">
-              <tr class="empty-row"><td colspan="5">No textbooks currently borrowed</td></tr>
-            </tbody>
-          </table>
+        <!-- Page heading -->
+        <div class="page-header">
+          <h1>Textbook Rental Management</h1>
+          <p>Manage textbook rentals and returns</p>
         </div>
-      </div>
 
-      <!-- All Textbooks -->
-      <div class="card">
-        <h2 class="section-title">Available Textbooks</h2>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Course Code</th>
-                <th>Author</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="avail-tbody"></tbody>
-          </table>
+        <!-- Small stat cards -->
+        <div class="stats-row two" style="margin-bottom:24px;">
+
+          <!-- Total textbooks -->
+          <div class="stat-card">
+            <div class="stat-label">Total Textbooks</div>
+            <div class="stat-value">4</div>
+          </div>
+
+          <!-- Currently borrowed -->
+          <div class="stat-card">
+            <div class="stat-label">Currently Borrowed</div>
+            <div class="stat-value" id="borrowed-count">0</div>
+          </div>
+
         </div>
+
+        <!-- Borrowed textbooks table -->
+        <div class="card" style="margin-bottom:20px;">
+          <h2 class="section-title">Currently Borrowed Textbooks</h2>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Course Code</th>
+                  <th>Borrowed By</th>
+                  <th>Borrow Time</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <!-- Borrowed rows go here -->
+              <tbody id="borrowed-tbody">
+                <tr class="empty-row">
+                  <td colspan="5">No textbooks currently borrowed</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Available textbooks table -->
+        <div class="card">
+          <h2 class="section-title">Available Textbooks</h2>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Course Code</th>
+                  <th>Author</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+
+              <!-- Available rows go here -->
+              <tbody id="avail-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
-</div>
-<div id="toast" class="toast"></div>
 
-<script src="../../js/shared.js"></script>
-<script>
-  requireAuth('Staff');
-  document.getElementById('sidebar-placeholder').innerHTML = buildSidebar('Staff', 'Textbook Rentals');
+  <div id="toast" class="toast"></div>
 
-  let books = BOOKS.map(b => ({ ...b, borrowedBy: null, borrowTime: null }));
+  <script src="../../js/shared.js"></script>
 
-  function renderTables() {
-    const borrowed = books.filter(b => b.borrowedBy);
-    document.getElementById('borrowed-count').textContent = borrowed.length;
+  <script>
+    // make sure only staff can access this page
+    requireAuth('Staff');
 
+    // load the sidebar
+    const sidebarPlaceholder = document.getElementById('sidebar-placeholder');
+    sidebarPlaceholder.innerHTML = buildSidebar('Staff', 'Textbook Rentals');
+
+    let books = getBooksData();
+
+    // useful elements
+    const borrowedCount = document.getElementById('borrowed-count');
     const borrowedTbody = document.getElementById('borrowed-tbody');
-    borrowedTbody.innerHTML = borrowed.length ? borrowed.map(b => `
-      <tr>
-        <td><strong>${b.title}</strong></td>
-        <td>${b.course}</td>
-        <td>${b.borrowedBy}</td>
-        <td>${b.borrowTime}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="returnBook('${b.id}')">Mark Returned</button></td>
-      </tr>`).join('') : '<tr class="empty-row"><td colspan="5">No textbooks currently borrowed</td></tr>';
+    const availTbody = document.getElementById('avail-tbody');
 
-    document.getElementById('avail-tbody').innerHTML = books.map(b => `
-      <tr>
-        <td>${b.title}</td>
-        <td>${b.course}</td>
-        <td>${b.author}</td>
-        <td><span class="badge ${b.status === 'available' ? 'badge-green' : 'badge-gray'}">${b.status === 'available' ? 'Available' : 'Borrowed'}</span></td>
-      </tr>`).join('');
-  }
+    // show both tables on the page
+    function renderTables() {
+      books = getBooksData();
 
-  function returnBook(id) {
-    const book = books.find(b => b.id === id);
-    if (book) {
-      book.status = 'available';
-      book.borrowedBy = null;
-      book.borrowTime = null;
-      showToast('Textbook marked as returned!', 'success');
-      renderTables();
+      let borrowedBooks = [];
+
+      for (let i = 0; i < books.length; i++) {
+        if (books[i].status === 'unavailable' && books[i].borrowedBy) {
+          borrowedBooks.push(books[i]);
+        }
+      }
+
+      document.getElementById('borrowed-count').textContent = borrowedBooks.length;
+
+      const borrowedTbody = document.getElementById('borrowed-tbody');
+
+      if (borrowedBooks.length > 0) {
+        let borrowedHtml = '';
+
+        for (let i = 0; i < borrowedBooks.length; i++) {
+          const book = borrowedBooks[i];
+
+          borrowedHtml += `
+            <tr>
+              <td><strong>${book.title}</strong></td>
+              <td>${book.course}</td>
+              <td>${book.borrowedBy}</td>
+              <td>${book.borrowTime}</td>
+              <td>
+                <button class="btn btn-outline btn-sm" onclick="returnBook('${book.id}')">
+                  Mark Returned
+                </button>
+              </td>
+            </tr>
+          `;
+        }
+
+        borrowedTbody.innerHTML = borrowedHtml;
+      } else {
+        borrowedTbody.innerHTML = '<tr class="empty-row"><td colspan="5">No textbooks currently borrowed</td></tr>';
+      }
+
+      const availTbody = document.getElementById('avail-tbody');
+      let availableHtml = '';
+
+      for (let i = 0; i < books.length; i++) {
+        const book = books[i];
+
+        let badgeClass = '';
+        let statusText = '';
+
+        if (book.status === 'available') {
+          badgeClass = 'badge-green';
+          statusText = 'Available';
+        } else {
+          badgeClass = 'badge-gray';
+          statusText = 'Borrowed';
+        }
+
+        availableHtml += `
+          <tr>
+            <td>${book.title}</td>
+            <td>${book.course}</td>
+            <td>${book.author}</td>
+            <td><span class="badge ${badgeClass}">${statusText}</span></td>
+          </tr>
+        `;
+      }
+
+      availTbody.innerHTML = availableHtml;
     }
-  }
 
-  renderTables();
-</script>
+    // mark a book as returned
+    function returnBook(id) {
+      let foundBook = null;
+
+      for (let i = 0; i < books.length; i++) {
+        if (books[i].id === id) {
+          foundBook = books[i];
+          break;
+        }
+      }
+
+      if (foundBook) {
+        foundBook.status = 'available';
+        foundBook.borrowedBy = null;
+        foundBook.borrowTime = null;
+
+        saveBooksData(books);
+
+        showToast('Textbook marked as returned!', 'success');
+        renderTables();
+      }
+    }
+
+    // first render when page loads
+    renderTables();
+  </script>
+
 </body>
 </html>
