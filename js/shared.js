@@ -41,9 +41,9 @@ const USERS = [
 ];
 
 const BOOKINGS = [
-  { room: 'Room 104', floor: 'Floor 1', date: 'Mar 13, 2026', time: '10:00 - 11:00', status: 'Upcoming', student: 'John Smith', studentId: 'Y123456' },
-  { room: 'Room 205', floor: 'Floor 2', date: 'Mar 13, 2026', time: '13:00 - 14:00', status: 'Upcoming', student: 'John Smith', studentId: 'Y123456' },
-  { room: 'Room 103', floor: 'Floor 1', date: 'Mar 13, 2026', time: '11:00 - 12:00', status: 'Upcoming', student: 'Sarah Johnson', studentId: 'Y234567' },
+  { room: 'Room 303', floor: 'Floor 3', date: 'Apr 2, 2026', time: '12:00 - 13:00', status: 'Upcoming', student: 'Sarah Johnson', studentId: 'Y234567' },
+  { room: 'Room 201', floor: 'Floor 2', date: 'Apr 1, 2026', time: '14:00 - 15:00', status: 'Upcoming', student: 'John Smith', studentId: 'Y123456' },
+  { room: 'Room 103', floor: 'Floor 1', date: 'Apr 1, 2026', time: '11:00 - 12:00', status: 'Booked', student: 'Sarah Johnson', studentId: 'Y234567' },
 ];
 
 const TIME_SLOTS = ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',

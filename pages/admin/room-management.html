@@ -200,12 +200,6 @@
     renderRooms();
   });
 
-  // Close on backdrop click
-  ['room-modal', 'delete-modal'].forEach(id => {
-    document.getElementById(id).addEventListener('click', e => {
-      if (e.target.id === id) document.getElementById(id).classList.remove('open');
-    });
-  });
 
   renderRooms();
 </script>

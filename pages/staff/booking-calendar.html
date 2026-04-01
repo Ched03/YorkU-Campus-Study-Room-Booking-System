@@ -17,7 +17,7 @@
         <p>View and manage daily bookings</p>
       </div>
 
-      <div style="display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;">
+      <div style="display:grid;grid-template-columns:minmax(420px, 500px) 1fr;gap:20px;align-items:start;">
         <!-- Calendar Card -->
         <div class="card">
           <h2 class="section-title">Select Date</h2>
@@ -84,17 +84,19 @@
   requireAuth('Staff');
   document.getElementById('sidebar-placeholder').innerHTML = buildSidebar('Staff', 'Booking Calendar');
 
-  let currentYear = 2026, currentMonth = 2; // 0-indexed, March = 2
+  let currentYear = 2026, currentMonth = 3; // 0-indexed, March = 2
   let selectedDate = null;
 
   const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   // Bookings keyed by date string "YYYY-MM-DD"
   const BOOKING_DATA = {
-    '2026-03-13': [
-      { time: '10:00 - 11:00', room: 'Room 104 – Floor 1', student: 'John Smith', status: 'Upcoming' },
-      { time: '11:00 - 12:00', room: 'Room 103 – Floor 1', student: 'Sarah Johnson', status: 'Upcoming' },
-      { time: '13:00 - 14:00', room: 'Room 205 – Floor 2', student: 'John Smith', status: 'Upcoming' },
+    '2026-04-01': [
+    { time: '14:00 - 15:00', room: 'Room 201 – Floor 2', student: 'John Smith', status: 'Upcoming' },
+    { time: '11:00 - 12:00', room: 'Room 103 – Floor 1', student: 'Sarah Johnson', status: 'Booked' },
+    ],
+  '2026-04-02': [
+    { time: '12:00 - 13:00', room: 'Room 303 – Floor 3', student: 'Sarah Johnson', status: 'Upcoming' },
     ],
   };
 
@@ -162,10 +164,11 @@
     if (currentMonth > 11) { currentMonth = 0; currentYear++; }
     renderCalendar();
   });
-
   renderCalendar();
-  // Default select today-ish
-  selectDate('2026-03-14', 14);
+
+// set default date to presentation day
+selectedDate = '2026-04-01';
+selectDate('2026-04-01', 1);
 </script>
 </body>
 </html>

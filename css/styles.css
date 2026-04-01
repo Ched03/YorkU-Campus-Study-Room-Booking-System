@@ -753,3 +753,6 @@ tr:hover td { background: var(--gray-100); }
   .sidebar { transform: translateX(-100%); }
   .main-with-sidebar { margin-left: 0; }
 }
+#cal-days {
+  display: contents;
+}
